@@ -36,7 +36,7 @@
  * disables flooding the typewriter's lines to prevent passing keys when there
  * is nothing being actively written.
  */
-//#define KEYBOARD_PASSTHROUGH
+#define KEYBOARD_PASSTHROUGH
 
 /*
  * TODO: though I'm tempted to throw the metapass idea out, it would still be
@@ -536,6 +536,8 @@ void setup(void) {
    */
   digitalWrite(LED, HIGH);
 
+  delay(4000);
+  
   init_scans();
   init_read();
   write_signs(0xFF);
@@ -547,9 +549,23 @@ void setup(void) {
  * loop --
  *    standard Arduino function.
  */
+
+int textLength = 860;
+int currentIndex = 0;
+int currentCharacterTime = millis();
+int spacingInterval = 250; //random(150,500);
+
+String text = "\n 10.32 \n Air traffic controllers contact the plane and receive no answer. \n Almost at the same time, an alarm goes off in the cockpit saying \"sink rate\". \n \n 10.30-10.34 \n Further Hits and kicks against the door. \nThere are loud bangs on the door. \n The captain screams \"For God's sake, open the door!\" \n Passengers can be heard screaming in the background. \n \n 10.35 \n Loud metallic bangs can be heard as though someone is trying to \n knock down the door. Presumably a metal axe. \n  \n 10.36-10.37 \n 90 seconds later: Warning Sound: \"Terrain, pull up\" \n The captain is heard screaming, \"Open the damn door\" \n  \n 10.38 \n The co-pilot can be heard breathing. \n  \n 10.40 \n Last sounds like the plane's right wing scrapes a mountaintop. \n Screams can be heard one more time. \n  \n Those are the last sounds on the voice recorder.";
+
 void loop(void) {
   uint8_t scans = read_scans();
   uint8_t changes = debounce(scans, &loopstate.debouncer);
+  
+  if(!writestate.character && currentIndex < textLength && millis() - currentCharacterTime > spacingInterval) {
+    writestate.character = text.charAt(currentIndex);
+    currentIndex++;
+    currentCharacterTime = millis();
+  }
 
   if(changes) {
     loopstate.scanedge = millis();
@@ -598,3 +614,4 @@ void loop(void) {
     delay(1);
   }
 }
+
